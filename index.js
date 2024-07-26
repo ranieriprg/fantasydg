@@ -1,70 +1,35 @@
 const express = require("express");
-const inquirer = require("inquirer");
-
-//models
-const Warrior = require("./models/Warrior");
-const Rogue = require("./models/Rogue");
-const Mage = require("./models/Mage");
-
-const ascii = require("./ASCII");
-
-const prompt = inquirer.createPromptModule();
 const app = express();
 
-function startGame() {
-  // asciiArt.js
-  console.log(`
-    ________ ________  ________   _________  ________  ________       ___    ___ ________  ________     
-   |\\  _____\\   __  \\|\\   ___  \\|\\___   ___\\   __  \\|\\   ____\\     |\\  \\  /  /|\\   ___ \\|\\   ____\\    
-   \\ \\  \\__/\\ \\  \\|\\  \\ \\  \\\\ \\  \\|___ \\  \\_\\ \\  \\|\\  \\ \\  \\___|_    \\ \\  \\/  / | \\  \\_\\ \\ \\  \\___|    
-    \\ \\   __\\ \\ \\   __  \\ \\  \\\\ \\  \\   \\ \\  \\ \\ \\   __  \\ \\_____  \\    \\ \\    / / \\ \\  \\ \\ \\ \\  \\  ___  
-     \\ \\  \\_|  \\ \\  \\ \\  \\ \\  \\\\ \\  \\   \\ \\  \\ \\ \\  \\ \\  \\|_____|  \\    \\/  /  /   \\ \\  \\_\\ \\ \\  \\|  \\ 
-      \\ \\__\\    \\ \\__\\ \\__\\ \\__\\ \\__\\   \\ \\__\\ \\ \\__\\ \\__\\____\\_\\  \\ __/  / /      \\ \\_______\\ \\_______\\
-       \\|__|     \\|__|\\|__|\\|__|\\|__|    \\|__|  \\|__|\\|__|\\_________\\|___/ /        \\|_______|\\|_______|
-                                                     \\|_________\\|___|/                             
-   `);
+//controller
+const GameController = require("./controllers/GameController");
+const gameController = new GameController();
 
-  prompt([
-    {
-      type: "input",
-      name: "heroName",
-      message: "Bem vindo ao final fantasy, qual o seu nome Héroi?",
-    },
-  ])
-    .then((answers) => {
-      const heroName = answers["heroName"];
-      console.log(`O nome do seu herói é: ${heroName}`);
-      createHero(heroName);
-    })
-    .catch((error) => {
-      console.error("Erro ao obter o nome do herói:", error);
-    });
-}
-
-function createHero(heroName) {
-  let hero;
+function navigateMenu(heroName) {
   prompt([
     {
       type: "list",
-      name: "class",
-      message: "Qual a sua classe?",
-      choices: ["Warrior", "Mage", "Rogue"],
+      name: "chosenOption",
+      message: `Diga campeão, o que deseja fazer? ${heroName}`,
+      choices: ["Explore", "Itens", "Status", "Save"],
     },
   ])
     .then((answers) => {
-      const chosenClass = answers["class"];
-      if (chosenClass === "Warrior") {
-        hero = new Warrior(heroName);
-        console.log(ascii.warrior);
-        hero.displayStats()
-      } else if (chosenClass === "Mage") {
-        hero = new Mage(heroName);
-        console.log(ascii.mage);
+      const chosenOption = answers["chosenOption"];
+
+      if (chosenOption === "Explore") {
+        explore();
+      } else if (chosenOption === "Itens") {
+        console.log("inventário está vazio");
+        navigateMenu(heroName);
+        return;
+      } else if (chosenOption === "Status") {
         hero.displayStats();
-      } else if (chosenClass === "Rogue") {
-        hero = new Rogue(heroName);
-        console.log(ascii.rogue);
-        hero.displayStats();
+
+        navigateMenu(heroName);
+      } else if (chosenOption === "Save") {
+        console.log("inventário está vazio");
+        navigateMenu(heroName);
       }
     })
     .catch((err) => {
@@ -72,7 +37,11 @@ function createHero(heroName) {
     });
 }
 
+function explore() {
+  console.log("log explore retorno");
+}
+
 app.listen(5000, () => {
+  gameController.startGame();
   // Chama a função startGame após o servidor iniciar
-  startGame();
 });
